@@ -1,25 +1,17 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
 
-function App() {
+import { useScrollToTop } from './hooks/use-scroll-to-top';
+
+import Router from './routes/sections';
+import ThemeProvider from './theme';
+
+export default function App() {
+  useScrollToTop(); // Utilisation du hook useScrollToTop pour le défilement vers le haut
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider>
+          <Router />
+    </ThemeProvider>
   );
 }
-
-export default App;

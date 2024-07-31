@@ -1,89 +1,47 @@
 import { useState } from 'react';
-
 import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
 import Container from '@mui/material/Container';
-import TableBody from '@mui/material/TableBody';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 import { users } from '../../../_mock/user';
 import Scrollbar from '../../../components/scrollbar';
-
 import TableNoData from '../table-no-data';
-import UserTableRow from '../user-table-row';
-import UserTableHead from '../user-table-head';
-import TableEmptyRows from '../table-empty-rows';
 import UserTableToolbar from '../user-table-toolbar';
-import { emptyRows, applyFilter, getComparator } from '../utils';
-
-// ----------------------------------------------------------------------
+import { applyFilter, getComparator } from '../utils';
 
 export default function UserPage() {
-  const [page, setPage] = useState(0);
-
-  const [order, setOrder] = useState('asc');
-
-  const [selected, setSelected] = useState([]);
-
-  const [orderBy, setOrderBy] = useState('name');
-
   const [filterName, setFilterName] = useState('');
-
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  const handleSort = (event, id) => {
-    const isAsc = orderBy === id && order === 'asc';
-    if (id !== '') {
-      setOrder(isAsc ? 'desc' : 'asc');
-      setOrderBy(id);
-    }
-  };
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = users.map((n) => n.name);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
-    }
-    setSelected(newSelected);
-  };
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setPage(0);
-    setRowsPerPage(parseInt(event.target.value, 10));
-  };
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleFilterByName = (event) => {
-    setPage(0);
     setFilterName(event.target.value);
+  };
+
+  const handleClick = (event, user) => {
+    setSelectedUser(user);
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMenuOption = (option) => {
+    console.log(`${option} for ${selectedUser.name}`);
+    handleCloseMenu();
   };
 
   const dataFiltered = applyFilter({
     inputData: users,
-    comparator: getComparator(order, orderBy),
+    comparator: getComparator('asc', 'name'),
     filterName,
   });
 
@@ -92,70 +50,77 @@ export default function UserPage() {
   return (
     <Container>
 
-      <Card>
+      <Box sx={{
+      margin: 'auto',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      maxWidth: 900,
+      right: '10rem',
+      gap: 4,
+      position: 'relative',
+      transform: 'translateX(10rem)'
+      }}>
         <UserTableToolbar
-          numSelected={selected.length}
           filterName={filterName}
           onFilterName={handleFilterByName}
         />
-
+        
         <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <UserTableHead
-                order={order}
-                orderBy={orderBy}
-                rowCount={users.length}
-                numSelected={selected.length}
-                onRequestSort={handleSort}
-                onSelectAllClick={handleSelectAllClick}
-                headLabel={[
-                  { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
-                  { id: 'status', label: 'Status' },
-                  { id: '' },
-                ]}
-              />
-              <TableBody>
-                {dataFiltered
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
-                    <UserTableRow
-                      key={row.id}
-                      name={row.name}
-                      role={row.role}
-                      status={row.status}
-                      company={row.company}
-                      avatarUrl={row.avatarUrl}
-                      isVerified={row.isVerified}
-                      selected={selected.indexOf(row.name) !== -1}
-                      handleClick={(event) => handleClick(event, row.name)}
-                    />
-                  ))}
-
-                <TableEmptyRows
-                  height={77}
-                  emptyRows={emptyRows(page, rowsPerPage, users.length)}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {dataFiltered.map((user) => (
+              <Card 
+                variant="outlined" 
+                sx={{ 
+                  padding: 2, 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  minWidth: '100%', // Ensure it takes full width of the container
+                  flexShrink: 0
+                }} 
+                key={user.id}
+              >
+                <Avatar
+                  src={user.avatarUrl}
+                  alt={user.name}
+                  sx={{ width: 56, height: 56, marginRight: 2 }}
                 />
-
-                {notFound && <TableNoData query={filterName} />}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6" sx={{ marginBottom: 0.5 }}>
+                    {user.name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 0.5 }}>
+                    {user.role}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {user.company}
+                  </Typography>
+                </Box>
+                <Button variant="contained" color="primary" sx={{ marginRight: 2 }}>
+                  Message
+                </Button>
+                <IconButton onClick={(event) => handleClick(event, user)}>
+                  <MoreVertIcon />
+                </IconButton>
+              </Card>
+            ))}
+          </Box>
         </Scrollbar>
 
-        <TablePagination
-          page={page}
-          component="div"
-          count={users.length}
-          rowsPerPage={rowsPerPage}
-          onPageChange={handleChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Card>
+        {notFound && <TableNoData query={filterName} />}
+
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleCloseMenu}
+        >
+          <MenuItem onClick={() => handleMenuOption('Unfollow')}>Unfollow</MenuItem>
+          <MenuItem onClick={() => handleMenuOption('Manage Notifications')}>Manage Notifications</MenuItem>
+          <MenuItem onClick={() => handleMenuOption('See Shared Activity')}>See Shared Activity</MenuItem>
+          <MenuItem onClick={() => handleMenuOption('Mute')}>Mute</MenuItem>
+          <MenuItem onClick={handleCloseMenu}>Cancel</MenuItem>
+        </Menu>
+      </Box>
     </Container>
   );
 }

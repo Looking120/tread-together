@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 
 import DashboardLayout from '../layouts/dashboard';
+import FollowPage from '../pages/follow';
 
 // Import des pages dynamiques
 const IndexPage = lazy(() => import('../pages/app'));
@@ -34,6 +35,8 @@ export default function Router() {
         { path: 'products', element: <ProductsPage /> },
         { path: 'store', element: <StorePage /> },
         { path: 'profile', element: <ProfilePage /> },
+        { path: 'follow', element: <FollowPage /> },
+       
       ],
     },
     {

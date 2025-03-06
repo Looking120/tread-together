@@ -1,3 +1,4 @@
+// src/pages/login/LoginView.js
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -15,31 +16,56 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { useRouter } from '../../routes/hooks';
 import Logo from '../../components/logo';
 import Iconify from '../../components/iconify';
-import { bgGradient } from '../../theme/css'; // Assurez-vous d'importer bgGradient
+import { bgGradient } from '../../theme/css';
+import { signIn } from '../../utils/authUtils'; 
 
 export default function LoginView({ onLogin }) {
   const theme = useTheme();
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleClick = () => {
-    // Simuler une authentification réussie
-    setTimeout(() => {
-      onLogin(); // Appel de la fonction onLogin fournie en tant que prop
-      router.push('/'); // Redirection après connexion
-    }, 1000);
+  const handleClick = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Appel de l'API de connexion
+      const tokenDto = await signIn(email, password);
+
+      // Stockez le token JWT dans le localStorage
+      localStorage.setItem('token', tokenDto.token);
+
+      // Appeler la fonction onLogin pour rediriger l'utilisateur
+      onLogin();
+      router.push('/');
+    } catch (err) {
+      setError('Échec de la connexion. Vérifiez vos identifiants.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderForm = (
     <>
       <Stack spacing={3}>
-        <TextField name="email" label="Email address" />
+        <TextField
+          name="email"
+          label="Email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
         <TextField
           name="password"
           label="Password"
           type={showPassword ? 'text' : 'password'}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -51,6 +77,12 @@ export default function LoginView({ onLogin }) {
           }}
         />
       </Stack>
+
+      {error && (
+        <Typography color="error" sx={{ mt: 2 }}>
+          {error}
+        </Typography>
+      )}
 
       <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
         <Link variant="subtitle2" underline="hover">
@@ -65,6 +97,7 @@ export default function LoginView({ onLogin }) {
         variant="contained"
         color="inherit"
         onClick={handleClick}
+        loading={loading}
       >
         Login
       </LoadingButton>
@@ -93,7 +126,7 @@ export default function LoginView({ onLogin }) {
       >
         <Logo sx={{ mb: 2 }} />
 
-        <Typography variant="h4">Sign in to Minimal</Typography>
+        <Typography variant="h4">Sign </Typography>
 
         <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
           Don’t have an account?

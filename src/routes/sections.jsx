@@ -1,30 +1,23 @@
 import { lazy, Suspense } from 'react';
-import { Outlet, Navigate, useRoutes, useNavigate } from 'react-router-dom';
+import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 
 import DashboardLayout from '../layouts/dashboard';
 import FollowPage from '../pages/follow';
+import ProtectedRoute from '../utils/ProtectedRoute'; 
 
 // Import des pages dynamiques
-const HomePage = lazy(() => import('../pages/app'));
+const AppPage = lazy(() => import('../pages/app')); // Page AppPage
 const StorePage = lazy(() => import('../pages/store'));
 const UserPage = lazy(() => import('../pages/user'));
-const IndexPage = lazy(() => import('../pages/login')); // This is your LoginView component
+const LoginPage = lazy(() => import('../pages/login')); // Page de connexion
 const ProductsPage = lazy(() => import('../pages/products'));
 const Page404 = lazy(() => import('../pages/page-not-found'));
 const ProfilePage = lazy(() => import('../pages/profile'));
+const SignUpPage = lazy(() => import('../pages/signUp')); // Page d'inscription
 
 // ----------------------------------------------------------------------
 
 export default function Router() {
-  const navigate = useNavigate();
-
-  // Define the onLogin function
-  const handleLogin = () => {
-    // Perform any login logic here (e.g., API calls, validation)
-    // Redirect to the home page after successful login
-    navigate('/');
-  };
-
   const routes = useRoutes([
     {
       path: '/',
@@ -32,15 +25,37 @@ export default function Router() {
     },
     {
       path: 'login',
-      element: <IndexPage onLogin={handleLogin} />, // Pass onLogin as a prop
+      element: <LoginPage />, // Page de connexion
+    },
+    {
+      path: 'signup', // Route pour la page d'inscription
+      element: (
+        <Suspense fallback={<div>Chargement...</div>}>
+          <SignUpPage />
+        </Suspense>
+      ),
+    },
+    {
+      path: 'app', // Route pour la page AppPage
+      element: (
+        <ProtectedRoute> {/* Protéger la route AppPage */}
+          <DashboardLayout>
+            <Suspense fallback={<div>Chargement...</div>}>
+              <AppPage />
+            </Suspense>
+          </DashboardLayout>
+        </ProtectedRoute>
+      ),
     },
     {
       element: (
-        <DashboardLayout>
-          <Suspense fallback={<div>Chargement...</div>}>
-            <Outlet />
-          </Suspense>
-        </DashboardLayout>
+        <ProtectedRoute> {/* Protéger toutes les routes enfants */}
+          <DashboardLayout>
+            <Suspense fallback={<div>Chargement...</div>}>
+              <Outlet />
+            </Suspense>
+          </DashboardLayout>
+        </ProtectedRoute>
       ),
       children: [
         { path: 'user', element: <UserPage /> },

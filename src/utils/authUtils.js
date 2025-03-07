@@ -1,65 +1,59 @@
-const API_BASE_URL = 'http://localhost:5000/api/auth'; 
+const API_BASE_URL = 'https://localhost:7294/api';
 
-export const signIn = async (email, password) =>{
-    const response = await fetch(`${API_BASE_URL }/signIn` ,{
-        method: 'POST',
-        headers:{
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({email, password}),
-    });
+export const signIn = async (email, password) => {
+  const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  });
 
-    if(!response.ok){
-        throw new Error('Echec de la connexion...');
-    }
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Échec de la connexion...');
+  }
 
-    return response.json()
+  return response.json();
 };
 
-export const signUp = async (
-    firstName, 
-    lastName,
-    birthDate,
-    userName,
-    email, 
-    password, 
-    confirmPassword
-    ) => {
-    const response = await fetch(`${API_BASE_URL} /signup`,{
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+export const signUp = async (firstName, lastName, birthDate, userName, email, password, confirmPassword) => {
+  const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      firstName,
+      lastName,
+      birthDate,
+      userName,
+      email,
+      password,
+      confirmPassword,
+    }),
+  });
 
-        body: JSON.stringify({
-            firstName,
-            lastName,
-            birthDate,
-            userName,
-            email,
-            password,
-            confirmPassword
-        }),
-    })
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Échec de l'inscription...");
+  }
 
-    if(!response.ok){
-        throw new Error("echec de l'inscription...")
-    }
-    return response.json();
+  return response.json();
 };
 
-export const signOut = async (userId) =>{
-    const response = await fetch(`${API_BASE_URL} /signout`,{
-        method: 'POST',
-        headers:{
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({userId}),
-    });
+export const signOut = async (userId) => {
+  const response = await fetch(`${API_BASE_URL}/auth/signout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userId }),
+  });
 
-    if(!response.ok){
-        throw new Error('Echec de la connexion...')
-    }
+  if (!response.ok) {
+    throw new Error('Échec de la déconnexion...');
+  }
 
-    return response.json();
+  return response.json();
 };

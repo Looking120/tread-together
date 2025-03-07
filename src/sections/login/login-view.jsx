@@ -1,11 +1,8 @@
-// src/pages/login/LoginView.js
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom'; // Importer useNavigate
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -13,15 +10,16 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { useRouter } from '../../routes/hooks';
 import Logo from '../../components/logo';
 import Iconify from '../../components/iconify';
 import { bgGradient } from '../../theme/css';
-import { signIn } from '../../utils/authUtils'; 
+import { signIn } from '../../utils/authUtils';
+import { useAuth } from '../../utils/authContext';
 
-export default function LoginView({ onLogin }) {
+export default function LoginPage({ onLogin }) {
   const theme = useTheme();
-  const router = useRouter();
+  const navigate = useNavigate(); // Utiliser useNavigate pour la redirection
+  const { login } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -40,11 +38,13 @@ export default function LoginView({ onLogin }) {
       // Stockez le token JWT dans le localStorage
       localStorage.setItem('token', tokenDto.token);
 
-      // Appeler la fonction onLogin pour rediriger l'utilisateur
-      onLogin();
-      router.push('/');
+      // Connecter l'utilisateur
+      login(tokenDto.token);
+
+      // Rediriger vers la page AppPage après la connexion
+      navigate('/app'); // Assurez-vous que cette route correspond à celle de AppPage
     } catch (err) {
-      setError('Échec de la connexion. Vérifiez vos identifiants.');
+      setError(err.message || 'Échec de la connexion. Vérifiez vos identifiants.');
     } finally {
       setLoading(false);
     }
@@ -85,8 +85,10 @@ export default function LoginView({ onLogin }) {
       )}
 
       <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
-        <Link variant="subtitle2" underline="hover">
-          Forgot password?
+        <Link to="/forgot-password" style={{ textDecoration: 'none' }}>
+          <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
+            Forgot password?
+          </Typography>
         </Link>
       </Stack>
 
@@ -126,54 +128,30 @@ export default function LoginView({ onLogin }) {
       >
         <Logo sx={{ mb: 2 }} />
 
-        <Typography variant="h4">Sign </Typography>
+        <Typography variant="h4">Sign In</Typography>
 
-        <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
+        <Typography variant="body2" sx={{ mt: 2, mb: 5 , display: 'flex', alignItems: 'center'}}>
           Don’t have an account?
-          <Link variant="subtitle2" sx={{ ml: 0.5 }}>
-            Get started
+          <Link
+            to="/signup"
+            style={{ textDecoration: 'none' }}
+          >
+            <Typography
+              variant="subtitle2"
+              sx={{
+                ml: 0.5,
+                color: theme.palette.primary.main,
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
+              }}
+            >
+              Get started
+            </Typography>
           </Link>
         </Typography>
 
         {renderForm}
-
-        <Divider sx={{ my: 3 }}>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            OR
-          </Typography>
-        </Divider>
-
-        <Stack direction="row" spacing={2}>
-          <Button
-            fullWidth
-            size="large"
-            color="inherit"
-            variant="outlined"
-            sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-          >
-            <Iconify icon="eva:google-fill" color="#DF3E30" />
-          </Button>
-
-          <Button
-            fullWidth
-            size="large"
-            color="inherit"
-            variant="outlined"
-            sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-          >
-            <Iconify icon="eva:facebook-fill" color="#1877F2" />
-          </Button>
-
-          <Button
-            fullWidth
-            size="large"
-            color="inherit"
-            variant="outlined"
-            sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-          >
-            <Iconify icon="eva:twitter-fill" color="#1C9CEA" />
-          </Button>
-        </Stack>
       </Card>
     </Box>
   );

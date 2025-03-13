@@ -2,8 +2,7 @@ import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import RouterLink from '../../routes/components/router-link'; // Assurez-vous que le chemin d'importation de RouterLink est correct
-
+import RouterLink from '../../routes/components/router-link'; 
 // ----------------------------------------------------------------------
 
 const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
@@ -13,11 +12,11 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
   const logo = (
     <Box
       component="img"
-      src="logo.png" // Assurez-vous que le chemin d'accès à votre logo est correct
-      alt="Logo" // Assurez-vous d'ajouter un attribut alt pour l'accessibilité
+      src="logo.png" 
+      alt="Logo" 
       sx={{
-        width: 50, // Ajustez la largeur selon vos besoins
-        height: 50, // Ajustez la hauteur selon vos besoins
+        width: 200, 
+        height: 100, 
         cursor: 'pointer',
         ...sx,
       }}
@@ -30,7 +29,7 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
   }
 
   return (
-    <Link component={RouterLink} to="/" underline="none" sx={{ display: 'contents' }}>
+    <Link component={RouterLink} to="/app" underline="none" sx={{ display: 'contents' }}>
       {logo}
     </Link>
   );

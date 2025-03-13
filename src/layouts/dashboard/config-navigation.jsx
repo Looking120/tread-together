@@ -9,7 +9,7 @@ const icon = (name) => (
 const navConfig = [
   {
     title: 'Home',
-    path: '/',
+    path: '/app',
     icon: icon('home_icon'),
   },
   {
@@ -39,6 +39,7 @@ const navConfig = [
     path: '/store',
     icon: icon('store_icon'),
   },
+
   {
     title: 'profile',
     path: 'profile',

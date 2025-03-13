@@ -21,12 +21,18 @@ import navConfig from './config-navigation';
 
 import { ChatBot } from '../../sections/chatbot/view';
 
+
+
 // ----------------------------------------------------------------------
 
 export function Nav({ openNav, onCloseNav }) {
   const pathname = usePathname();
   const upLg = useResponsive('up', 'lg');
   const [openModal, setOpenModal] = useState(false);
+
+  const userString = localStorage.getItem('user');
+  const user = userString && userString !== 'undefined' ? JSON.parse(userString) : null; // Vérifier si userString est valide
+
 
   useEffect(() => {
     if (openNav) {
@@ -65,12 +71,12 @@ export function Nav({ openNav, onCloseNav }) {
         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12),
       }}
     >
-      <Avatar src={account.photoURL} alt="photoURL" />
+      <Avatar src={user?.photoURL  } alt={user?.userName} />
 
       <Box sx={{ ml: 2 }}>
-        <Typography variant="subtitle2">{account.displayName}</Typography>
+        <Typography variant="subtitle2">{user?.userName || 'Invité' }</Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {account.role}
+          {user?.role}
         </Typography>
       </Box>
     </Box>

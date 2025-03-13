@@ -1,5 +1,5 @@
 import { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
@@ -8,11 +8,9 @@ import { alpha } from '@mui/material/styles';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import { signOut } from '../../../utils/authUtils'; // Importer la fonction de déconnexion
 
-import { account } from '../../../_mock/account';
-
-// ----------------------------------------------------------------------
-
+// Options du menu
 const MENU_OPTIONS = [
   {
     label: 'Home',
@@ -28,21 +26,39 @@ const MENU_OPTIONS = [
   },
 ];
 
-// ----------------------------------------------------------------------
-
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+  const navigate = useNavigate();
 
+  // Récupérer les informations de l'utilisateur depuis le localStorage
+  const userString = localStorage.getItem('user');
+  const user = userString && userString !== 'undefined' ? JSON.parse(userString) : null; // Vérifier si userString est valide
+
+  // Ouvrir le popover
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
 
+  // Fermer le popover
   const handleClose = () => {
     setOpen(null);
   };
 
+  // Gérer la déconnexion
+  const handleLogout = async () => {
+    try {
+      await signOut(); // Appeler la fonction de déconnexion
+      handleClose(); // Fermer le popover
+      navigate('/login'); // Rediriger vers la page de connexion
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+      navigate('/login'); // Rediriger en cas d'erreur
+    }
+  };
+
   return (
     <>
+      {/* Bouton pour ouvrir le popover */}
       <IconButton
         onClick={handleOpen}
         sx={{
@@ -56,18 +72,19 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={account.photoURL}
-          alt={account.displayName}
+          src={user?.photoURL || '/default-avatar.png'} // Utiliser la photo de l'utilisateur ou une photo par défaut
+          alt={user?.userName}
           sx={{
             width: 36,
             height: 36,
             border: (theme) => `solid 2px ${theme.palette.background.default}`,
           }}
         >
-          {account.displayName.charAt(0).toUpperCase()}
+          {user?.userName?.charAt(0).toUpperCase()}
         </Avatar>
       </IconButton>
 
+      {/* Popover */}
       <Popover
         open={!!open}
         anchorEl={open}
@@ -83,17 +100,19 @@ export default function AccountPopover() {
           },
         }}
       >
+        {/* Informations de l'utilisateur */}
         <Box sx={{ my: 1.5, px: 2 }}>
           <Typography variant="subtitle2" noWrap>
-            {account.displayName}
+            {user?.userName || 'Invité'} {/* Afficher "Invité" si l'utilisateur n'est pas connecté */}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {account.email}
+            {user?.email || 'Non connecté'} {/* Afficher "Non connecté" si l'utilisateur n'est pas connecté */}
           </Typography>
         </Box>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
+        {/* Options du menu */}
         {MENU_OPTIONS.map((option) => (
           <MenuItem key={option.label} onClick={handleClose}>
             {option.label}
@@ -102,10 +121,11 @@ export default function AccountPopover() {
 
         <Divider sx={{ borderStyle: 'dashed', m: 0 }} />
 
+        {/* Option de déconnexion */}
         <MenuItem
           disableRipple
           disableTouchRipple
-          onClick={handleClose}
+          onClick={handleLogout}
           sx={{ typography: 'body2', color: 'error.main', py: 1.5 }}
         >
           Logout

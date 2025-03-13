@@ -6,6 +6,7 @@ const AuthContext = createContext();
 // Provider pour gérer l'authentification
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
 
   // Vérifier l'authentification au chargement de l'application
   useEffect(() => {
@@ -28,8 +29,10 @@ export const AuthProvider = ({ children }) => {
     window.location.href = '/login'; // Rediriger vers la page de connexion
   };
 
+
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout,  }}>
       {children}
     </AuthContext.Provider>
   );

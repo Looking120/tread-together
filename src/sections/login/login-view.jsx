@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Importer useNavigate
+import { useNavigate, Link } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -18,7 +18,7 @@ import { useAuth } from '../../utils/authContext';
 
 export default function LoginPage({ onLogin }) {
   const theme = useTheme();
-  const navigate = useNavigate(); // Utiliser useNavigate pour la redirection
+  const navigate = useNavigate();
   const { login } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -33,16 +33,22 @@ export default function LoginPage({ onLogin }) {
 
     try {
       // Appel de l'API de connexion
-      const tokenDto = await signIn(email, password);
+      const response = await signIn(email, password);
 
-      // Stockez le token JWT dans le localStorage
-      localStorage.setItem('token', tokenDto.token);
+      // Stocker le token et les informations de l'utilisateur dans le localStorage
+      localStorage.setItem('token', response.accessToken);
+      localStorage.setItem('user', JSON.stringify({
+        id: response.id,
+        userName: response.userName,
+        email: response.email,
+        role: response.role,
+      }));
 
       // Connecter l'utilisateur
-      login(tokenDto.token);
+      login(response.accessToken);
 
       // Rediriger vers la page AppPage après la connexion
-      navigate('/app'); // Assurez-vous que cette route correspond à celle de AppPage
+      navigate('/app');
     } catch (err) {
       setError(err.message || 'Échec de la connexion. Vérifiez vos identifiants.');
     } finally {
@@ -130,12 +136,9 @@ export default function LoginPage({ onLogin }) {
 
         <Typography variant="h4">Sign In</Typography>
 
-        <Typography variant="body2" sx={{ mt: 2, mb: 5 , display: 'flex', alignItems: 'center'}}>
+        <Typography variant="body2" sx={{ mt: 2, mb: 5, display: 'flex', alignItems: 'center' }}>
           Don’t have an account?
-          <Link
-            to="/signup"
-            style={{ textDecoration: 'none' }}
-          >
+          <Link to="/signup" style={{ textDecoration: 'none' }}>
             <Typography
               variant="subtitle2"
               sx={{

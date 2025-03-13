@@ -40,11 +40,6 @@ const navConfig = [
     icon: icon('store_icon'),
   },
   {
-    title: 'login',
-    path: '/login',
-    icon: icon('ic_lock'),
-  },
-  {
     title: 'profile',
     path: 'profile',
     icon: icon('ic_disabled'),

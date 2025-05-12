@@ -72,3 +72,33 @@ export const signOut = async () => {
     console.error('Erreur lors de la déconnexion:', error);
   }
 };
+
+export const getRegisteredUsers = async () => {
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  const response = await fetch(`${API_BASE_URL}/users`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      // Token invalide ou expiré
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      throw new Error('Session expired. Please login again.');
+    }
+    
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to fetch users');
+  }
+
+  return await response.json();
+};

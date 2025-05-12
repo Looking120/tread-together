@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
@@ -9,8 +9,10 @@ import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 
-import { users } from '../../../_mock/user';
+import { getRegisteredUsers } from '../../../utils/authUtils'; 
 import Scrollbar from '../../../components/scrollbar';
 import TableNoData from '../table-no-data';
 import UserTableToolbar from '../user-table-toolbar';
@@ -20,6 +22,35 @@ export default function UserPage() {
   const [filterName, setFilterName] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const apiUsers = await getRegisteredUsers();
+        
+        // Transformez les données de l'API pour correspondre à votre interface
+        const formattedUsers = apiUsers.map(user => ({
+          id: user.id,
+          name: user.userName || `${user.firstName} ${user.lastName}`,
+          avatarUrl: user.avatarUrl || `/assets/images/avatars/avatar_default.jpg`,
+          role: user.role || 'Membre',
+          company: user.company || 'Non spécifié',
+          email: user.email
+        }));
+        
+        setUsers(formattedUsers);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleFilterByName = (event) => {
     setFilterName(event.target.value);
@@ -47,19 +78,32 @@ export default function UserPage() {
 
   const notFound = !dataFiltered.length && !!filterName;
 
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
+  }
+
   return (
     <Container>
-
       <Box sx={{
-      margin: 'auto',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      maxWidth: 900,
-      right: '10rem',
-      gap: 4,
-      position: 'relative',
-      transform: 'translateX(10rem)'
+        margin: 'auto',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        maxWidth: 900,
+        gap: 4,
+        py: 4
       }}>
         <UserTableToolbar
           filterName={filterName}
@@ -75,8 +119,7 @@ export default function UserPage() {
                   padding: 2, 
                   display: 'flex', 
                   alignItems: 'center',
-                  minWidth: '100%', // Ensure it takes full width of the container
-                  flexShrink: 0
+                  minWidth: '100%',
                 }} 
                 key={user.id}
               >
@@ -96,7 +139,12 @@ export default function UserPage() {
                     {user.company}
                   </Typography>
                 </Box>
-                <Button variant="contained" color="primary" sx={{ marginRight: 2 }}>
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  sx={{ marginRight: 2 }}
+                  onClick={() => console.log(`Message to ${user.email}`)}
+                >
                   Message
                 </Button>
                 <IconButton onClick={(event) => handleClick(event, user)}>
@@ -115,8 +163,12 @@ export default function UserPage() {
           onClose={handleCloseMenu}
         >
           <MenuItem onClick={() => handleMenuOption('Unfollow')}>Unfollow</MenuItem>
-          <MenuItem onClick={() => handleMenuOption('Manage Notifications')}>Manage Notifications</MenuItem>
-          <MenuItem onClick={() => handleMenuOption('See Shared Activity')}>See Shared Activity</MenuItem>
+          <MenuItem onClick={() => handleMenuOption('Manage Notifications')}>
+            Manage Notifications
+          </MenuItem>
+          <MenuItem onClick={() => handleMenuOption('See Shared Activity')}>
+            See Shared Activity
+          </MenuItem>
           <MenuItem onClick={() => handleMenuOption('Mute')}>Mute</MenuItem>
           <MenuItem onClick={handleCloseMenu}>Cancel</MenuItem>
         </Menu>

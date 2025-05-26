@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
+import MenuItem from '@mui/material/MenuItem';
 import { Link, useNavigate } from 'react-router-dom';
 
 import Logo from '../../components/logo';
@@ -24,22 +25,32 @@ export default function SignUpPage({ onSignUp }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [gender, setGender] = useState('');
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const genders = [
+    { value: 'Male', label: 'Male' },
+    { value: 'Female', label: 'Female' },
+    { value: 'Other', label: 'Other' }
+  ];
 
   const handleClick = async () => {
     setLoading(true);
     setError('');
 
     // Validation des champs
-    if (!firstName || !lastName || !birthDate || !userName || !email || !password || !confirmPassword) {
-      setError('Tous les champs sont obligatoires.');
+    if (!firstName || !lastName || !birthDate || !userName || !email || !password || !confirmPassword || !phoneNumber || !address || !gender) {
+      setError('Tous les champs obligatoires doivent être remplis.');
       setLoading(false);
       return;
     }
@@ -65,10 +76,13 @@ export default function SignUpPage({ onSignUp }) {
         userName,
         email,
         password,
-        confirmPassword
+        confirmPassword,
+        middleName,
+        gender,
+        phoneNumber,
+        address
       );
 
-      
       // Connecter l'utilisateur après l'inscription
       login(response.token);
 
@@ -90,29 +104,36 @@ export default function SignUpPage({ onSignUp }) {
   const renderForm = (
     <>
       <Stack spacing={3}>
-        {/* Première ligne : Prénom et Nom */}
+        {/* Première ligne : Prénom, Middle Name et Nom */}
         <Stack direction="row" spacing={2}>
           <TextField
             name="firstName"
-            label="First Name"
+            label="First Name *"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             fullWidth
           />
           <TextField
+            name="middleName"
+            label="Middle Name"
+            value={middleName}
+            onChange={(e) => setMiddleName(e.target.value)}
+            fullWidth
+          />
+          <TextField
             name="lastName"
-            label="Last Name"
+            label="Last Name *"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             fullWidth
           />
         </Stack>
 
-        {/* Deuxième ligne : Date de naissance et Nom d'utilisateur */}
+        {/* Deuxième ligne : Date de naissance, Genre et Nom d'utilisateur */}
         <Stack direction="row" spacing={2}>
           <TextField
             name="birthDate"
-            label="Birth Date"
+            label="Birth Date *"
             type="date"
             value={birthDate}
             onChange={(e) => setBirthDate(e.target.value)}
@@ -122,28 +143,60 @@ export default function SignUpPage({ onSignUp }) {
             fullWidth
           />
           <TextField
+            select
+            name="gender"
+            label="Gender *"
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            fullWidth
+          >
+            {genders.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
             name="userName"
-            label="Username"
+            label="Username *"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
             fullWidth
           />
         </Stack>
 
-        {/* Troisième ligne : Email */}
+        {/* Troisième ligne : Email et Phone Number */}
+        <Stack direction="row" spacing={2}>
+          <TextField
+            name="email"
+            label="Email address *"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            fullWidth
+          />
+          <TextField
+            name="phoneNumber"
+            label="Phone Number *"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            fullWidth
+          />
+        </Stack>
+
+        {/* Quatrième ligne : Address */}
         <TextField
-          name="email"
-          label="Email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          name="address"
+          label="Address *"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
           fullWidth
         />
 
-        {/* Quatrième ligne : Mot de passe et Confirmation du mot de passe */}
+        {/* Cinquième ligne : Mot de passe et Confirmation du mot de passe */}
         <Stack direction="row" spacing={2}>
           <TextField
             name="password"
-            label="Password"
+            label="Password *"
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -160,7 +213,7 @@ export default function SignUpPage({ onSignUp }) {
           />
           <TextField
             name="confirmPassword"
-            label="Confirm Password"
+            label="Confirm Password *"
             type={showConfirmPassword ? 'text' : 'password'}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -217,7 +270,7 @@ export default function SignUpPage({ onSignUp }) {
         sx={{
           p: 5,
           width: '100%',
-          maxWidth: 600,
+          maxWidth: 800, // Augmenté pour accommoder plus de champs
         }}
       >
         <Logo sx={{ mb: 2 }} />

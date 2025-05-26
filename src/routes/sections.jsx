@@ -4,31 +4,37 @@ import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 import DashboardLayout from '../layouts/dashboard';
 import FollowPage from '../pages/follow';
 import ProtectedRoute from '../utils/ProtectedRoute'; 
+import { useAuth } from '../utils/authContext';
 
-// Import des pages dynamiques
-const AppPage = lazy(() => import('../pages/app')); // Page AppPage
-const StorePage = lazy(() => import('../pages/store'));
+// Chargement synchrone des composants fréquemment utilisés
 const UserPage = lazy(() => import('../pages/user'));
-const LoginPage = lazy(() => import('../pages/login')); // Page de connexion
+const ProfilePage = lazy(() => import('../pages/profile'));
+const AddEmployeePage = lazy(() => import('../pages/AddEmp'));
+
+// Autres pages
+const AppPage = lazy(() => import('../pages/app'));
+const StorePage = lazy(() => import('../pages/store'));
+const LoginPage = lazy(() => import('../pages/login'));
 const ProductsPage = lazy(() => import('../pages/products'));
 const Page404 = lazy(() => import('../pages/page-not-found'));
-const ProfilePage = lazy(() => import('../pages/profile'));
-const SignUpPage = lazy(() => import('../pages/signUp')); // Page d'inscription
+const SignUpPage = lazy(() => import('../pages/signUp'));
 
-// ----------------------------------------------------------------------
-
-export default function Router() {
-  const routes = useRoutes([
+const AppRoutes = () => {
+  return useRoutes([
     {
       path: '/',
-      element: <Navigate to="/login" replace />, // Redirige vers /login par défaut
+      element: <Navigate to="/login" replace />,
     },
     {
       path: 'login',
-      element: <LoginPage />, // Page de connexion
+      element: (
+        <Suspense fallback={<div>Chargement...</div>}>
+          <LoginPage />
+        </Suspense>
+      ),
     },
     {
-      path: 'signup', // Route pour la page d'inscription
+      path: 'signup',
       element: (
         <Suspense fallback={<div>Chargement...</div>}>
           <SignUpPage />
@@ -36,9 +42,9 @@ export default function Router() {
       ),
     },
     {
-      path: 'app', // Route pour la page AppPage
+      path: 'app',
       element: (
-        <ProtectedRoute> {/* Protéger la route AppPage */}
+        <ProtectedRoute>
           <DashboardLayout>
             <Suspense fallback={<div>Chargement...</div>}>
               <AppPage />
@@ -49,19 +55,41 @@ export default function Router() {
     },
     {
       element: (
-        <ProtectedRoute> {/* Protéger toutes les routes enfants */}
+        <ProtectedRoute>
           <DashboardLayout>
-            <Suspense fallback={<div>Chargement...</div>}>
+            <Suspense fallback={<div>Chargement du tableau de bord...</div>}>
               <Outlet />
             </Suspense>
           </DashboardLayout>
         </ProtectedRoute>
       ),
       children: [
-        { path: 'user', element: <UserPage /> },
+        { 
+          path: 'user', 
+          element: (
+            <Suspense fallback={<div>Chargement du profil utilisateur...</div>}>
+              <UserPage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: 'user/add', 
+          element: (
+            <Suspense fallback={<div>Chargement du formulaire...</div>}>
+              <AddEmployeePage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: 'profile', 
+          element: (
+            <Suspense fallback={<div>Chargement du profil...</div>}>
+              <ProfilePage />
+            </Suspense>
+          ) 
+        },
         { path: 'products', element: <ProductsPage /> },
         { path: 'store', element: <StorePage /> },
-        { path: 'profile', element: <ProfilePage /> },
         { path: 'follow', element: <FollowPage /> },
       ],
     },
@@ -71,9 +99,17 @@ export default function Router() {
     },
     {
       path: '*',
-      element: <Navigate to="/404" replace />, // Redirige vers la page 404 pour les routes inconnues
+      element: <Navigate to="/404" replace />,
     },
   ]);
+};
 
-  return routes;
+export default function Router() {
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Chargement de l'application...</div>;
+  }
+
+  return <AppRoutes />;
 }
